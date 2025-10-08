@@ -1,5 +1,7 @@
 using UnityEngine;
 using System;
+using UnityEngine.InputSystem;
+using Unity.VisualScripting;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -14,9 +16,19 @@ public class MapGenerator : MonoBehaviour
 
     int[,] map;
 
+
     private void Start()
     {
         GenerateMap();
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Debug.Log(Input.GetMouseButtonDown(0));
+            GenerateMap();
+        }
     }
 
     void GenerateMap()
@@ -28,6 +40,9 @@ public class MapGenerator : MonoBehaviour
         {
             SmoothMap();
         }
+
+        MeshGenerator meshGen = GetComponent<MeshGenerator>();
+        meshGen.GenerateMesh(map, 1);
     }
 
     void RandomFillMap()
@@ -61,7 +76,16 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
+                int neighbourWallTiles = GetSurroundingWallCount(x, y);
 
+                if (neighbourWallTiles > 4)
+                {
+                    map[x, y] = 1;
+                }
+                else if (neighbourWallTiles < 4)
+                {
+                    map[x, y] = 0;
+                }
             }
         }
     }
@@ -72,16 +96,26 @@ public class MapGenerator : MonoBehaviour
         {
             for (int neighbourY = gridY - 1; neighbourY <= gridY + 1; neighbourY++)
             {
-                return 0;
+                if (neighbourX >= 0 && neighbourX < width && neighbourY >= 0 && neighbourY < height)
+                {
+                    if (neighbourX != gridX || neighbourY != gridY)
+                    {
+                        wallCount += map[neighbourX, neighbourY];
+                    }
+                }
+                else
+                {
+                    wallCount++;
+                }
             }
         }
-        return 0;
+        return wallCount;
         
     }
 
     private void OnDrawGizmos()
     {
-        if (map != null)
+        /*if (map != null)
         {
             for (int x = 0; x < width; x++)
             {
@@ -92,6 +126,6 @@ public class MapGenerator : MonoBehaviour
                     Gizmos.DrawCube(pos, Vector3.one);
                 }
             }
-        }
+        }*/
     }
 }
