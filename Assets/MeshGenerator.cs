@@ -16,14 +16,19 @@ public class MeshGenerator : MonoBehaviour
 
     public void GenerateMesh(int[,] map, float squareSize)
     {
+        // Clear old data for new mesh.
         triangleDictionary.Clear();
         outlines.Clear();
         checkedVertices.Clear();
 
+        // Create grid of squares based on map.
         squareGrid = new SquareGrid(map, squareSize);
+
+        // Create verts and triangles for the mesh.
         vertices = new List<Vector3>();
         triangles = new List<int>();
 
+        // Iterate through each square in grid and triangulate it.
         for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
         {
             for (int y = 0; y < squareGrid.squares.GetLength(1); y++)
@@ -31,6 +36,7 @@ public class MeshGenerator : MonoBehaviour
                 TriangulateSquare(squareGrid.squares[x, y]);
             }
         }
+
         Mesh mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
@@ -350,8 +356,11 @@ public class MeshGenerator : MonoBehaviour
     }
     public class Square
     {
+        // Control nodes at corners because they control whether a square is active.
         public ControlNode topLeft, topRight, bottomRight, bottomLeft;
+        // Nodes at centre of each edge because we triangulate based on them.
         public Node centreTop, centreRight, centreBottom, centreLeft;
+        // Configuration is baed on which control nodes are active.
         public int configuration;
 
         public Square(ControlNode _topLeft, ControlNode _topRight, ControlNode _bottomRight, ControlNode _bottomLeft)
